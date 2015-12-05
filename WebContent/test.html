@@ -1,0 +1,22 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+
+</head>
+<body>
+
+<script type="text/javascript">
+var loa = '';
+var cc = window.opener.location.href;
+alert(cc);
+var searchArrs = ['www.baidu.com','www.haosou.com','www.sogou.com','www.youdao.com'];
+var _len = searchArrs.length;
+while(_len--){
+ if(cc.indexOf(searchArrs[_len]) > -1){
+   break;
+ }
+}
+alert(_len);
+</script>
+</body>
+</html>

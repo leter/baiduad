@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>   
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+<!-- 	%c 输出日志信息所属的类的全名 
+		%d 输出日志时间点的日期或时间，默认格式为 ISO8601， 也可以在其后指定格式，比如：%d{yyyy-MM-dd HH:mm:ss }，输出类似：2008-08-08 20:08:08
+	 	%f 输出日志信息所属的类的类名 
+	 	%l 输出日志事件的发生位置，即输出日志信息的语句处于它所在的类的第几行
+	  	%m 输出代码中指定的信息，如log(message)中的message
+	  	%n 输出一个回车换行符，Windows平台为“rn”，Unix平台为“n”
+	    %p 输出优先级，即 DEBUG、INFO、WARN、ERROR、FATAL。如果是调用 debug() 输出的，则为 DEBUG，依此类推
+	    %r 输出自应用启动到输出该日志信息所耗费的毫秒数 
+	    %t 输出产生该日志事件的线程名 -->
+
+		<!-- Log4j提供的appender有以下几种: -->
+		<!-- org.apache.log4j.ConsoleAppender(控制台), -->
+		<!-- org.apache.log4j.FileAppender(文件), -->
+		<!-- org.apache.log4j.DailyRollingFileAppender(每天产生一个日志文件), -->
+		<!-- org.apache.log4j.RollingFileAppender(文件大小到达指定尺寸的时候产生一个新的文件), -->
+		<!-- org.apache.log4j.WriterAppender(将日志信息以流格式发送到任意指定的地方) -->
+		<!-- OFF、 FATAL、ERROR、WARN、INFO、DEBUG、TRACE、ALL -->
+	<appender name="Console" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%-5p][%c:%L][%d{yyyy-MM-dd HH:mm:ss}]-[%m]%n" />
+		</layout>
+	</appender>
+
+	<appender name="File_log" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="E:/ad.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd'.log'" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%-5p][%c:%L][%d{yyyy-MM-dd HH:mm:ss}]-[%m]%n" />
+		</layout>
+	</appender>
+
+
+	<!-- additivity=false 就不会在父Logger（rootLogger）输出 ,默认是true -->
+	<logger name="org.springframework" additivity="true">
+		<level value="ERROR" />
+		<appender-ref ref="File_log" />
+	</logger>
+
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="Console" />
+		<appender-ref ref="File_log" />
+	</root>
+</log4j:configuration>   

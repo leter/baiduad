@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/aop
+						http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+						http://www.springframework.org/schema/tx
+						http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context-3.0.xsd
+						http://www.springframework.org/schema/mvc
+						http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+	<!-- 加入扫描包位置 -->
+	<context:component-scan base-package="com.baiduad" />
+	<!-- 分散配置 -->
+	<context:property-placeholder location="WEB-INF/classes/jdbc.properties" />
+	<!--  c3p0的数据源，设置它是为了配置jbdcTemplate-->
+	<bean id="comboPooledDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<!-- 驱动程序 -->
+		<property name="driverClass">
+			<value>${driverClass}</value>
+		</property>
+		<!-- 用户名 -->
+		<property name="user">
+			<value>${username}</value>
+		</property>
+		<!-- 密码 -->
+		<property name="password">
+			<value>${password}</value>
+		</property>
+		<!-- url -->
+		<property name="jdbcUrl">
+			<value>${url}</value>
+		</property>
+		<!-- 最大池数 -->
+		<property name="maxPoolSize">
+			<value>${c3p0.pool.max}</value>
+		</property>
+		<!-- 最小池数 -->
+		<property name="minPoolSize">
+			<value>${c3p0.pool.min}</value>
+		</property>
+		<!-- 初始化的池数 -->
+		<property name="initialPoolSize">
+			<value>${c3p0.pool.init}</value>
+		</property>
+		<property name="preferredTestQuery"> 
+			<value>SELECT 1</value>
+		</property>
+		<property name="idleConnectionTestPeriod"> 
+			<value>18000</value>
+		</property>
+		<property name="testConnectionOnCheckout"> 
+			<value>true</value>
+		</property>
+	</bean>
+	<!-- 配置jdbcTemplate的bean ,设置它是为了设置业务bean中的jdbcTemplate参数-->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<constructor-arg ref="comboPooledDataSource" />
+	</bean>
+	
+<!-- ****************************************************** -->
+	<!-- 向sprJDBCTransactionManager中注入jdbcTemplate -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="comboPooledDataSource" />
+	</bean>
+	<!-- 声明事务属性 定义事务通知  --> 
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="find*" read-only="true" />
+			<tx:method name="search*" read-only="true" />
+			<tx:method name="query*" read-only="true" />
+
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="del*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="do*" propagation="REQUIRED" />
+
+			<tx:method name="*" propagation="REQUIRED" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+	<aop:config>
+	<!-- 定义一个切面，即定义哪些方法应用这些规则。我们这里定义biz.impl包下的的所有类的所有方法都应用事务规则	-->
+	<aop:pointcut id="bizMethods"
+			expression="execution(* com.baiduad.service.impl.*.*(..))" />
+	<!-- 织入  将事务通知和切面组合。即将事务属性和应用范围关联  -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="bizMethods" />
+	</aop:config>
+	
+	 <!-- 在spring环境之外获取 -->
+	<bean  class="com.baiduad.util.ApplicationContextHelper"/>
+	
+		<!-- 验证码插件 -->
+    <bean id="captchaProducer" class="com.google.code.kaptcha.impl.DefaultKaptcha">
+		<property name="config">
+			<bean class="com.google.code.kaptcha.util.Config">
+				<constructor-arg>
+					<props>
+						<prop key="kaptcha.border">no</prop>
+						<prop key="kaptcha.border.color">105,179,90</prop>
+						<prop key="kaptcha.textproducer.font.color">red</prop>
+						<prop key="kaptcha.image.width">250</prop>
+						<prop key="kaptcha.textproducer.font.size">90</prop>
+						<prop key="kaptcha.image.height">120</prop>
+						<prop key="kaptcha.session.key">code</prop>
+						<prop key="kaptcha.textproducer.char.length">4</prop>
+						<prop key="kaptcha.textproducer.font.names">宋体,楷体,微软雅黑</prop>
+					</props>
+				</constructor-arg>
+			</bean>
+		</property>
+	</bean>
+	
+		<!-- date转换器 -->					
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="webBindingInitializer">
+        	<bean class="com.baiduad.converter.DateConverter"/>
+        </property>
+	</bean>
+</beans>
