@@ -1,2 +1,3 @@
 # baiduad
-a projcet who kill the baidu.
+a projcet who killed the baidu.
+fucking joke.
